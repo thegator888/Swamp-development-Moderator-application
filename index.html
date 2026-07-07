@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Swamp Development — Staff Application</title>
+<style>
+  :root {
+    --accent: #1e6b3c;
+    --accent-dark: #14522c;
+    --accent-light: #e6f2ea;
+    --error: #d93025;
+    --text: #202124;
+    --text-secondary: #5f6368;
+    --border: #dadce0;
+    --card-bg: #ffffff;
+    --page-bg: #eef4ef;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--page-bg);
+    color: var(--text);
+    padding: 12px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding-bottom: 48px;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-top: 12px;
+    padding: 24px;
+    position: relative;
+  }
+
+  .card.error-card { border: 1px solid var(--error); }
+
+  /* Header card */
+  .header-card {
+    border-top: 10px solid var(--accent);
+    margin-top: 0;
+  }
+  .header-card h1 {
+    font-size: 32px;
+    font-weight: 400;
+    line-height: 1.25;
+    margin-bottom: 12px;
+  }
+  .header-card .form-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 14px;
+  }
+  .required-note {
+    font-size: 14px;
+    color: var(--error);
+  }
+
+  .section-label {
+    display: inline-block;
+    background: var(--accent-light);
+    color: var(--accent-dark);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-bottom: 14px;
+  }
+
+  .q-title {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+  .q-title .req { color: var(--error); margin-left: 4px; }
+  .q-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-top: 6px;
+  }
+
+  input[type="text"], textarea {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+    font: inherit;
+    font-size: 14px;
+    color: var(--text);
+    padding: 8px 0 6px;
+    margin-top: 16px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input[type="text"] { max-width: 380px; display: block; }
+  textarea {
+    resize: none;
+    overflow: hidden;
+    min-height: 38px;
+    line-height: 1.5;
+  }
+  input[type="text"]:focus, textarea:focus {
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 5px;
+  }
+  input::placeholder, textarea::placeholder { color: #9aa0a6; }
+
+  .field-error {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    color: var(--error);
+    font-size: 13px;
+    margin-top: 10px;
+  }
+  .error-card .field-error { display: flex; }
+
+  /* Footer / buttons */
+  .footer-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+  }
+  .btn {
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 26px;
+    cursor: pointer;
+    transition: background 0.15s, box-shadow 0.15s;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--accent-dark); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+  .btn-ghost {
+    background: none;
+    color: var(--accent-dark);
+    padding: 10px 14px;
+  }
+  .btn-ghost:hover { background: var(--accent-light); }
+  .btn-secondary {
+    background: var(--accent-light);
+    color: var(--accent-dark);
+  }
+  .btn-secondary:hover { background: #d4e8db; }
+
+  .page-footer {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 28px;
+    line-height: 1.8;
+  }
+
+  /* Confirmation view */
+  #confirmView { display: none; }
+  .confirm-title { font-size: 24px; font-weight: 400; margin-bottom: 8px; }
+  .confirm-sub { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+  .output-box {
+    width: 100%;
+    margin-top: 18px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #f8f9fa;
+    font-family: "Consolas", "Menlo", monospace;
+    font-size: 12.5px;
+    line-height: 1.6;
+    padding: 14px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-height: 420px;
+    overflow-y: auto;
+  }
+  .confirm-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+  }
+  .back-link {
+    display: inline-block;
+    margin-top: 18px;
+    font-size: 14px;
+    color: var(--accent-dark);
+    cursor: pointer;
+    text-decoration: underline;
+    background: none;
+    border: none;
+    font-family: inherit;
+    padding: 0;
+  }
+
+  @media (max-width: 480px) {
+    .card { padding: 18px; }
+    .header-card h1 { font-size: 26px; }
+    input[type="text"] { max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ============ FORM VIEW ============ -->
+  <div id="formView">
+    <div class="card header-card">
+      <h1>Swamp Development — Staff Application</h1>
+      <p class="form-desc">
+        Thank you for your interest in joining the Swamp Development staff team!
+        Please answer every question honestly and in as much detail as you can.
+        Low-effort or one-sentence answers may result in your application being denied.
+      </p>
+      <p class="required-note">* Indicates required question</p>
+    </div>
+
+    <!-- Applicant info -->
+    <div class="card" data-q>
+      <span class="section-label">Applicant Info</span>
+      <p class="q-title">Discord Username<span class="req">*</span></p>
+      <input type="text" id="discord" placeholder="Your answer" autocomplete="off">
+      <p class="field-error">⚠ This is a required question</p>
+    </div>
+
+    <div class="card" data-q>
+      <p class="q-title">Roblox Username<span class="req">*</span></p>
+      <input type="text" id="roblox" placeholder="Your answer" autocomplete="off">
+      <p class="field-error">⚠ This is a required question</p>
+    </div>
+
+    <div class="card" data-q>
+      <p class="q-title">Age<span class="req">*</span></p>
+      <input type="text" id="age" placeholder="Your answer" autocomplete="off">
+      <p class="field-error">⚠ This is a required question</p>
+    </div>
+
+    <!-- Questions injected by script -->
+    <div id="questions"></div>
+
+    <div class="footer-row">
+      <button class="btn btn-primary" id="submitBtn" type="button">Submit</button>
+      <button class="btn btn-ghost" id="clearBtn" type="button">Clear form</button>
+    </div>
+
+    <p class="page-footer">
+      Never submit passwords or personal information you are not comfortable sharing.<br>
+      This form was created for <strong>Swamp Development</strong>.
+    </p>
+  </div>
+
+  <!-- ============ CONFIRMATION VIEW ============ -->
+  <div id="confirmView">
+    <div class="card header-card">
+      <h2 class="confirm-title">Your application is ready! ✅</h2>
+      <p class="confirm-sub">
+        Your responses have been compiled below. Copy the text or download it as a file,
+        then submit it through the Swamp Development Discord server (application ticket or DM,
+        as instructed by staff).
+      </p>
+      <div class="output-box" id="outputBox"></div>
+      <div class="confirm-actions">
+        <button class="btn btn-primary" id="copyBtn" type="button">Copy to clipboard</button>
+        <button class="btn btn-secondary" id="downloadBtn" type="button">Download as .txt</button>
+      </div>
+      <button class="back-link" id="editBtn" type="button">← Edit my responses</button>
+    </div>
+    <p class="page-footer">This form was created for <strong>Swamp Development</strong>.</p>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  var QUESTIONS = [
+    {
+      title: "Why do you want to become a staff member at Swamp Development?",
+      desc: "Please explain your motivations for applying, what you hope to contribute, and why you believe you would be a valuable addition to the staff team."
+    },
+    {
+      title: "What previous moderation or leadership experience do you have?",
+      desc: "Include any experience from Discord servers, ERLC communities, gaming communities, schools, clubs, or other organizations."
+    },
+    {
+      title: "How would you handle a situation where two members are engaged in a heated argument?",
+      desc: "Describe the steps you would take to deescalate the situation while remaining fair, professional, and unbiased."
+    },
+    {
+      title: "A fellow staff member is seen breaking a server rule. What would you do?",
+      desc: "Explain how you would address the situation while respecting server policies and the staff hierarchy."
+    },
+    {
+      title: "How many hours per week can you realistically dedicate to Swamp Development?",
+      desc: "Please provide an honest estimate of your availability, including your time zone and any scheduling limitations."
+    },
+    {
+      title: "What qualities do you believe make an excellent staff member?",
+      desc: "Discuss the traits, skills, and behaviors you believe are essential for successful moderation and community management."
+    },
+    {
+      title: "How would you respond if a member accused you of being unfair or abusing your authority?",
+      desc: "Explain how you would communicate with the member, investigate the situation, and maintain professionalism."
+    },
+    {
+      title: "What is your understanding of Swamp Development’s community standards and expectations?",
+      desc: "Summarize what you believe the server values and how staff members should uphold those standards."
+    },
+    {
+      title: "Describe a challenging situation you have faced in a community or team environment and how you handled it.",
+      desc: "Focus on the problem, the actions you took, and the outcome."
+    },
+    {
+      title: "Why should Swamp Development choose you over other applicants?",
+      desc: "Highlight your strengths, unique skills, work ethic, and anything else that makes you stand out as a candidate."
+    }
+  ];
+
+  var STORAGE_KEY = "swampStaffApplication";
+  var questionsHost = document.getElementById("questions");
+
+  // Build the 10 question cards
+  QUESTIONS.forEach(function (q, i) {
+    var card = document.createElement("div");
+    card.className = "card";
+    card.setAttribute("data-q", "");
+
+    var title = document.createElement("p");
+    title.className = "q-title";
+    title.textContent = (i + 1) + ". " + q.title;
+    var star = document.createElement("span");
+    star.className = "req";
+    star.textContent = "*";
+    title.appendChild(star);
+
+    var desc = document.createElement("p");
+    desc.className = "q-desc";
+    desc.textContent = q.desc;
+
+    var ta = document.createElement("textarea");
+    ta.id = "q" + (i + 1);
+    ta.rows = 1;
+    ta.placeholder = "Your answer";
+
+    var err = document.createElement("p");
+    err.className = "field-error";
+    err.textContent = "⚠ This is a required question";
+
+    card.appendChild(title);
+    card.appendChild(desc);
+    card.appendChild(ta);
+    card.appendChild(err);
+    questionsHost.appendChild(card);
+  });
+
+  var infoIds = ["discord", "roblox", "age"];
+  var allIds = infoIds.concat(QUESTIONS.map(function (_, i) { return "q" + (i + 1); }));
+
+  function autoGrow(el) {
+    el.style.height = "auto";
+    el.style.height = el.scrollHeight + "px";
+  }
+
+  // Restore any saved draft
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch (e) {}
+  allIds.forEach(function (id) {
+    var el = document.getElementById(id);
+    if (saved[id]) el.value = saved[id];
+    if (el.tagName === "TEXTAREA") autoGrow(el);
+    el.addEventListener("input", function () {
+      if (el.tagName === "TEXTAREA") autoGrow(el);
+      el.closest(".card").classList.remove("error-card");
+      saveDraft();
+    });
+  });
+
+  function saveDraft() {
+    var data = {};
+    allIds.forEach(function (id) { data[id] = document.getElementById(id).value; });
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) {}
+  }
+
+  function buildOutput() {
+    var lines = [];
+    lines.push("=== SWAMP DEVELOPMENT — STAFF APPLICATION ===");
+    lines.push("");
+    lines.push("Discord Username: " + document.getElementById("discord").value.trim());
+    lines.push("Roblox Username: " + document.getElementById("roblox").value.trim());
+    lines.push("Age: " + document.getElementById("age").value.trim());
+    lines.push("");
+    QUESTIONS.forEach(function (q, i) {
+      lines.push((i + 1) + ". " + q.title);
+      lines.push(document.getElementById("q" + (i + 1)).value.trim());
+      lines.push("");
+    });
+    lines.push("=== END OF APPLICATION ===");
+    return lines.join("\n");
+  }
+
+  // Submit with required validation
+  document.getElementById("submitBtn").addEventListener("click", function () {
+    var firstError = null;
+    allIds.forEach(function (id) {
+      var el = document.getElementById(id);
+      var card = el.closest(".card");
+      if (!el.value.trim()) {
+        card.classList.add("error-card");
+        if (!firstError) firstError = card;
+      } else {
+        card.classList.remove("error-card");
+      }
+    });
+    if (firstError) {
+      firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    document.getElementById("outputBox").textContent = buildOutput();
+    document.getElementById("formView").style.display = "none";
+    document.getElementById("confirmView").style.display = "block";
+    window.scrollTo({ top: 0 });
+  });
+
+  // Clear form
+  document.getElementById("clearBtn").addEventListener("click", function () {
+    if (!confirm("Clear the form? All of your answers will be erased.")) return;
+    allIds.forEach(function (id) {
+      var el = document.getElementById(id);
+      el.value = "";
+      if (el.tagName === "TEXTAREA") autoGrow(el);
+      el.closest(".card").classList.remove("error-card");
+    });
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  // Copy to clipboard
+  document.getElementById("copyBtn").addEventListener("click", function () {
+    var btn = this;
+    var text = document.getElementById("outputBox").textContent;
+    function done() {
+      btn.textContent = "Copied! ✓";
+      setTimeout(function () { btn.textContent = "Copy to clipboard"; }, 2000);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text); done(); });
+    } else {
+      fallbackCopy(text);
+      done();
+    }
+  });
+
+  function fallbackCopy(text) {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
+  // Download as .txt
+  document.getElementById("downloadBtn").addEventListener("click", function () {
+    var text = document.getElementById("outputBox").textContent;
+    var user = document.getElementById("discord").value.trim()
+      .toLowerCase().replace(/[^a-z0-9_-]+/g, "-").replace(/^-+|-+$/g, "") || "applicant";
+    var blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "swamp-staff-application-" + user + ".txt";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+  });
+
+  // Back to editing
+  document.getElementById("editBtn").addEventListener("click", function () {
+    document.getElementById("confirmView").style.display = "none";
+    document.getElementById("formView").style.display = "block";
+    window.scrollTo({ top: 0 });
+  });
+})();
+</script>
+</body>
+</html>
